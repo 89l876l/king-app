@@ -10,8 +10,9 @@
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "electron:dev": "cross-env NODE_ENV=development electron .",
-    "electron:build": "npm run build && electron-builder"
+    "electron:dev": "node scripts/electron-dev.cjs",
+    "electron:dev:main": "wait-on tcp:3000 && cross-env NODE_ENV=development electron .",
+    "electron:build": "npm run build && electron-builder --win"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
@@ -47,9 +48,21 @@
     "directories": {
       "output": "dist_electron"
     },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "artifactName": "${productName}-Setup-${version}.${ext}",
     "win": {
-      "target": "portable",
-      "icon": "public/icon.ico"
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
     }
   }
 }
