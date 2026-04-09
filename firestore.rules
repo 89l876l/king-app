@@ -1,0 +1,98 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: logs
+    // Fields:
+    //   - userId: string (required)
+    //   - action: string (required)
+    //   - timestamp: string (required)
+    //   - status: string (required, enum: ['success', 'error'])
+    //   - details: string (optional)
+    //
+    // Collection: sessions
+    // Fields:
+    //   - userId: string (required)
+    //   - loginTime: string (required)
+    //   - logoutTime: string (optional)
+    //   - ipAddress: string (optional)
+    //   - hwid: string (optional)
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isPrimaryAdmin() {
+      return isAuthenticated() && request.auth.token.email == "moody4383@gmail.com";
+    }
+
+    function getAdminData() {
+      return get(/databases/$(database)/documents/admins/$(request.auth.uid)).data;
+    }
+
+    function isOwner() {
+      return isPrimaryAdmin() || (isAuthenticated() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)) && getAdminData().role == 'owner');
+    }
+
+    function isAdmin() {
+      return isOwner() || (isAuthenticated() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)) && getAdminData().role == 'admin');
+    }
+
+    function isSupervisor() {
+      return isAdmin() || (isAuthenticated() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)) && getAdminData().role == 'supervisor');
+    }
+
+    function adminHwidMatch() {
+      return !exists(/databases/$(database)/documents/admins/$(request.auth.uid)) || 
+             getAdminData().hwid == null || 
+             getAdminData().hwid == "" || 
+             getAdminData().hwid == request.headers['x-hwid']; // We'll simulate this header or check in code
+    }
+
+    // Rules
+    match /keys/{keyId} {
+      allow read: if true;
+      allow create: if isSupervisor() || true; // Temporary allow for setup
+      allow update: if true; // Temporary allow for setup
+      allow delete: if isAdmin();
+    }
+
+    match /admins/{adminId} {
+      allow read: if true; // Temporary allow for setup
+      allow create: if true; // Temporary allow for setup
+      allow update: if true; // Temporary allow for setup
+      allow delete: if isOwner();
+    }
+
+    match /users/{userId} {
+      allow read: if isPrimaryAdmin() || isOwner();
+      allow write: if isPrimaryAdmin() || isOwner();
+    }
+
+    match /logs/{logId} {
+      allow create: if true;
+      allow read: if isSupervisor();
+    }
+
+    match /sessions/{sessionId} {
+      allow create, update: if true;
+      allow read: if isSupervisor();
+    }
+    
+    match /test/{docId} {
+      allow read: if true;
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

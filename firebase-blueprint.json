@@ -1,0 +1,79 @@
+{
+  "entities": {
+    "keys": {
+      "title": "License Keys",
+      "description": "Subscription keys for the application",
+      "type": "object",
+      "properties": {
+        "key": { "type": "string" },
+        "expiryDate": { "type": "string", "format": "date" },
+        "isLifetime": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["active", "expired", "revoked"] },
+        "hwid": { "type": "string", "description": "Locked Motherboard ID" },
+        "lastIp": { "type": "string", "description": "Last used IP address" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["key", "expiryDate", "status"]
+    },
+    "logs": {
+      "title": "System Logs",
+      "description": "Logs of system optimization activities",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The ID of the user who performed the action" },
+        "action": { "type": "string", "description": "The action performed (e.g., Deep Clean, HWID Spoof)" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "When the action occurred" },
+        "status": { "type": "string", "enum": ["success", "error"], "description": "Result of the action" },
+        "details": { "type": "string", "description": "Additional technical details" }
+      },
+      "required": ["userId", "action", "timestamp", "status"]
+    },
+    "sessions": {
+      "title": "User Sessions",
+      "description": "Tracking user login and logout events",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "loginTime": { "type": "string", "format": "date-time" },
+        "logoutTime": { "type": "string", "format": "date-time" },
+        "ipAddress": { "type": "string" },
+        "hwid": { "type": "string" }
+      },
+      "required": ["userId", "loginTime"]
+    },
+    "admins": {
+      "title": "Administrative Users",
+      "description": "Users with administrative or supervisor privileges",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "code": { "type": "string", "description": "Unique login code for this admin" },
+        "role": { "type": "string", "enum": ["owner", "admin", "supervisor"] },
+        "addedBy": { "type": "string", "description": "UID of the admin who added this user" },
+        "hwid": { "type": "string", "description": "Locked HWID for admin access" },
+        "status": { "type": "string", "enum": ["active", "suspended"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "role", "status", "code"]
+    }
+  },
+  "firestore": {
+    "/logs/{logId}": {
+      "schema": "logs",
+      "description": "Collection of system activity logs"
+    },
+    "/keys/{keyId}": {
+      "schema": "keys",
+      "description": "Collection of license keys"
+    },
+    "/sessions/{sessionId}": {
+      "schema": "sessions",
+      "description": "Collection of user session data"
+    },
+    "/admins/{adminId}": {
+      "schema": "admins",
+      "description": "Collection of administrative users"
+    }
+  }
+}

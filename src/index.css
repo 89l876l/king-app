@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-gaming-green: #00FF7F;
+  --color-gaming-dark: #050505;
+  --color-gaming-card: rgba(21, 22, 25, 0.7);
+  --color-gaming-border: rgba(51, 51, 51, 0.5);
+}
+
+@layer base {
+  body {
+    @apply bg-gaming-dark text-white font-sans antialiased overflow-x-hidden;
+    background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #050505 100%);
+  }
+}
+
+.stars-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.5;
+  animation: twinkle var(--duration) infinite ease-in-out;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.glass-panel {
+  @apply backdrop-blur-xl bg-gaming-card border border-gaming-border;
+}
+
+.terminal-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.terminal-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.terminal-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-gaming-green/20 rounded-full;
+}
+
+.terminal-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-gaming-green/40;
+}
